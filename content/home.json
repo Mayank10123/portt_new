@@ -1,0 +1,12 @@
+{
+  "model": "home",
+  "path": "/",
+  "fields": {
+    "full_name": "Mayank Mishra",
+    "role": "Full Stack Software Engineer",
+    "photo": "/assets/images/mayank.jpeg",
+    "bio": "<p>Myself Mayank Mishra, and I am a really passionate person, currently pursuing my B.Tech degree from Lovely Professional University. I am looking forward to working with you.</p>",
+    "location": "Punjab, India",
+    "linkedin_url": "https://www.linkedin.com/in/mayank-mishra-b80673319/"
+  }
+}

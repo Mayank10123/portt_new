@@ -1,0 +1,49 @@
+{
+  "name": "Home",
+  "type": "page",
+  "path": "/",
+  "fields": [
+    {
+      "handle": "full_name",
+      "type": "text",
+      "label": "Full Name",
+      "description": "Your full name",
+      "required": true
+    },
+    {
+      "handle": "role",
+      "type": "text",
+      "label": "Role",
+      "description": "e.g. \"Marketing Intern\"",
+      "required": true
+    },
+    {
+      "handle": "photo",
+      "type": "image",
+      "label": "Photo",
+      "description": "A clear headshot",
+      "required": true
+    },
+    {
+      "handle": "bio",
+      "type": "rich_text",
+      "label": "Bio",
+      "description": "Short paragraph about you",
+      "required": true
+    },
+    {
+      "handle": "location",
+      "type": "text",
+      "label": "Location",
+      "description": "City, Country",
+      "required": false
+    },
+    {
+      "handle": "linkedin_url",
+      "type": "text",
+      "label": "LinkedIn URL",
+      "description": "Your LinkedIn URL",
+      "required": false
+    }
+  ]
+}

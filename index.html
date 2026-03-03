@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mayank Mishra � Full Stack Engineer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ease: cubic-bezier(.4,0,.2,1);
+      --dur: .35s;
+      --bg-d:       #080c14;
+      --surface-d:  rgba(255,255,255,.045);
+      --border-d:   rgba(255,255,255,.08);
+      --text-d:     #f1f5f9;
+      --muted-d:    #64748b;
+      --bg-l:       #f4f7ff;
+      --surface-l:  rgba(255,255,255,.78);
+      --border-l:   rgba(0,0,0,.08);
+      --text-l:     #0f172a;
+      --muted-l:    #64748b;
+      --a1: #6366f1;
+      --a2: #a855f7;
+      --a3: #ec4899;
+      --gradient: linear-gradient(135deg, var(--a1), var(--a2), var(--a3));
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      min-height: 100dvh;
+      overflow-x: hidden;
+      background: var(--bg-d);
+      color: var(--text-d);
+      transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+      -webkit-font-smoothing: antialiased;
+    }
+    html.light body { background: var(--bg-l); color: var(--text-l); }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--a1); border-radius: 4px; }
+
+    #canvas { position: fixed; inset: 0; z-index: -2; pointer-events: none; }
+
+    .orb { position: fixed; border-radius: 50%; filter: blur(110px); z-index: -1; pointer-events: none; }
+    .orb-1 { width: min(560px,90vw); height: min(560px,90vw); background: radial-gradient(circle,#6366f130,transparent 70%); top:-15%; left:-10%; animation: orbFloat1 14s ease-in-out infinite; }
+    .orb-2 { width: min(480px,80vw); height: min(480px,80vw); background: radial-gradient(circle,#a855f728,transparent 70%); bottom:-10%; right:-8%; animation: orbFloat2 18s ease-in-out infinite; }
+    .orb-3 { width: min(300px,60vw); height: min(300px,60vw); background: radial-gradient(circle,#ec489918,transparent 70%); top:50%; left:50%; transform:translate(-50%,-50%); animation: orbFloat3 11s ease-in-out infinite; }
+    @keyframes orbFloat1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(5vw,-4vh)} }
+    @keyframes orbFloat2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-4vw,5vh)} }
+    @keyframes orbFloat3 { 0%,100%{transform:translate(-50%,-50%)} 50%{transform:translate(-48%,-52%) scale(1.1)} }
+
+    #theme-btn {
+      position: fixed; top: 1.25rem; right: 1.25rem; z-index: 100;
+      display: flex; align-items: center; gap: .5rem;
+      padding: .45rem .9rem; border-radius: 99px;
+      font-size: .72rem; font-weight: 600; letter-spacing: .03em;
+      cursor: pointer; user-select: none;
+      background: var(--surface-d); border: 1px solid var(--border-d); color: var(--text-d);
+      backdrop-filter: blur(16px);
+      transition: all var(--dur) var(--ease);
+      animation: fadeIn .6s .8s both;
+    }
+    html.light #theme-btn { background: var(--surface-l); border-color: var(--border-l); color: var(--text-l); }
+    #theme-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px #6366f128; }
+
+    .page {
+      min-height: 100dvh;
+      display: flex; align-items: center; justify-content: center;
+      padding: clamp(1.5rem,5vw,4rem);
+      padding-top: clamp(4rem,8vw,5rem);
+    }
+
+    .card {
+      width: 100%; max-width: 900px;
+      display: grid; grid-template-columns: 1fr;
+      border-radius: 2rem; overflow: hidden;
+      background: var(--surface-d); border: 1px solid var(--border-d);
+      backdrop-filter: blur(24px);
+      box-shadow: 0 32px 80px rgba(0,0,0,.45), 0 0 0 1px var(--border-d);
+      animation: fadeUp .9s .1s both;
+      transition: background var(--dur), border-color var(--dur), box-shadow var(--dur);
+    }
+    html.light .card { background: var(--surface-l); border-color: var(--border-l); box-shadow: 0 24px 64px rgba(99,102,241,.12), 0 0 0 1px var(--border-l); }
+    @media (min-width: 680px) { .card { grid-template-columns: 280px 1fr; } }
+
+    .panel-left {
+      display: flex; flex-direction: column; align-items: center;
+      padding: clamp(2rem,5vw,2.75rem);
+      background: rgba(255,255,255,.02);
+      border-right: 1px solid var(--border-d);
+      text-align: center;
+      transition: background var(--dur), border-color var(--dur);
+    }
+    html.light .panel-left { background: rgba(99,102,241,.03); border-right-color: var(--border-l); }
+    @media (max-width: 679px) { .panel-left { border-right: none; border-bottom: 1px solid var(--border-d); } }
+    @media (max-width: 679px) { html.light .panel-left { border-bottom-color: var(--border-l); } }
+
+    .photo-wrap { position: relative; margin-bottom: 1.5rem; animation: float 6s ease-in-out infinite; }
+    .photo-ring { position: absolute; inset: -3px; border-radius: 50%; background: conic-gradient(from 0deg,var(--a1),var(--a2),var(--a3),var(--a1)); animation: spin 5s linear infinite; }
+    .photo-gap { position: absolute; inset: -1px; border-radius: 50%; background: var(--bg-d); transition: background var(--dur); }
+    html.light .photo-gap { background: var(--bg-l); }
+    .photo-wrap img { position: relative; width: clamp(100px,20vw,130px); height: clamp(100px,20vw,130px); border-radius: 50%; object-fit: cover; display: block; box-shadow: 0 8px 32px rgba(99,102,241,.3); }
+    @keyframes spin  { to { transform: rotate(360deg); } }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+
+    .panel-left h1 { font-size: clamp(1.2rem,3.5vw,1.5rem); font-weight: 800; letter-spacing: -.02em; line-height: 1.2; margin-bottom: .5rem; animation: fadeUp .7s .25s both; }
+
+    .role-badge { display: inline-flex; align-items: center; gap: .35rem; padding: .3rem .85rem; border-radius: 99px; font-size: .68rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; background: var(--gradient); color: #fff; box-shadow: 0 4px 16px #a855f730; margin-bottom: 1rem; animation: fadeUp .7s .35s both; }
+
+    .location { display: flex; align-items: center; justify-content: center; gap: .35rem; font-size: .78rem; font-weight: 500; color: var(--muted-d); animation: fadeUp .7s .45s both; transition: color var(--dur); }
+    html.light .location { color: var(--muted-l); }
+
+    .divider { width: 100%; height: 1px; margin: 1.5rem 0; background: linear-gradient(90deg,transparent,var(--a1),transparent); opacity: .35; }
+
+    .socials { display: flex; flex-direction: column; gap: .6rem; width: 100%; animation: fadeUp .7s .55s both; }
+    .social-link { display: flex; align-items: center; gap: .6rem; padding: .6rem .9rem; border-radius: .75rem; font-size: .78rem; font-weight: 500; text-decoration: none; color: var(--text-d); background: rgba(255,255,255,.04); border: 1px solid var(--border-d); transition: all .25s var(--ease); }
+    html.light .social-link { color: var(--text-l); background: rgba(99,102,241,.05); border-color: var(--border-l); }
+    .social-link:hover { background: rgba(99,102,241,.15); border-color: var(--a1); transform: translateX(4px); box-shadow: 0 4px 16px #6366f120; }
+    .social-link span { flex: 1; }
+    .social-link .arrow { opacity: .4; font-size: .7rem; flex: none; }
+
+    .panel-right { padding: clamp(1.75rem,5vw,2.75rem); display: flex; flex-direction: column; gap: 2rem; }
+
+    .section-label { font-size: .63rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: .6rem; display: block; }
+
+    .bio-section { animation: fadeUp .7s .3s both; }
+    .bio-section p { font-size: clamp(.84rem,2vw,.94rem); line-height: 1.8; color: var(--muted-d); transition: color var(--dur); }
+    html.light .bio-section p { color: var(--muted-l); }
+
+    .stats { display: grid; grid-template-columns: repeat(3,1fr); gap: .7rem; animation: fadeUp .7s .4s both; }
+    @media (max-width: 440px) { .stats { grid-template-columns: 1fr 1fr; } }
+    .stat { padding: .9rem .6rem; border-radius: .9rem; text-align: center; background: rgba(255,255,255,.03); border: 1px solid var(--border-d); transition: all .25s var(--ease); }
+    html.light .stat { background: rgba(99,102,241,.04); border-color: var(--border-l); }
+    .stat:hover { border-color: var(--a1); transform: translateY(-3px); box-shadow: 0 8px 24px #6366f118; }
+    .stat-val { font-size: clamp(.9rem,2.5vw,1.1rem); font-weight: 800; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .stat-key { font-size: .6rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; margin-top: .2rem; color: var(--muted-d); transition: color var(--dur); }
+    html.light .stat-key { color: var(--muted-l); }
+
+    .skills-section { animation: fadeUp .7s .5s both; }
+    .skill-tags { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .6rem; }
+    .tag { padding: .28rem .65rem; border-radius: .45rem; font-size: .68rem; font-weight: 600; background: rgba(99,102,241,.1); border: 1px solid rgba(99,102,241,.2); color: #a5b4fc; transition: all .2s var(--ease); cursor: default; }
+    html.light .tag { background: rgba(99,102,241,.08); border-color: rgba(99,102,241,.25); color: #6366f1; }
+    .tag:hover { background: rgba(99,102,241,.2); border-color: var(--a1); transform: translateY(-2px); }
+
+    .cta-row { display: flex; flex-wrap: wrap; gap: .75rem; animation: fadeUp .7s .6s both; }
+
+    .btn-primary { display: inline-flex; align-items: center; gap: .5rem; padding: .7rem 1.4rem; border-radius: 99px; font-size: .8rem; font-weight: 600; text-decoration: none; color: #fff; background: var(--gradient); box-shadow: 0 4px 20px #a855f730; transition: all .25s var(--ease); position: relative; overflow: hidden; }
+    .btn-primary::after { content: ''; position: absolute; inset: 0; background: linear-gradient(120deg,transparent 20%,rgba(255,255,255,.22) 50%,transparent 80%); transform: translateX(-100%); transition: transform .5s var(--ease); }
+    .btn-primary:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 8px 32px #a855f745; }
+    .btn-primary:hover::after { transform: translateX(100%); }
+
+    .btn-secondary { display: inline-flex; align-items: center; gap: .5rem; padding: .7rem 1.4rem; border-radius: 99px; font-size: .8rem; font-weight: 600; text-decoration: none; color: var(--text-d); background: rgba(255,255,255,.05); border: 1px solid var(--border-d); transition: all .25s var(--ease); }
+    html.light .btn-secondary { color: var(--text-l); background: rgba(0,0,0,.04); border-color: var(--border-l); }
+    .btn-secondary:hover { border-color: var(--a1); background: rgba(99,102,241,.1); transform: translateY(-2px); }
+
+    .footer { text-align: center; margin-top: 1.5rem; font-size: .68rem; letter-spacing: .04em; color: var(--muted-d); opacity: .5; animation: fadeIn .8s 1s both; transition: color var(--dur); }
+    html.light .footer { color: var(--muted-l); }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  </style>
+</head>
+<body>
+
+  <canvas id="canvas"></canvas>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <button id="theme-btn" onclick="toggleTheme()">
+    <span id="t-icon">🌑</span>
+    <span id="t-label">Dark</span>
+  </button>
+
+  <div class="page">
+    <div style="width:100%;max-width:900px;">
+
+      <div class="card">
+
+        <!-- LEFT PANEL -->
+        <aside class="panel-left">
+
+          <div class="photo-wrap">
+            <div class="photo-ring"></div>
+            <div class="photo-gap"></div>
+            <img
+              src="mayank.jpeg"
+              alt="Mayank Mishra"
+              onerror="this.src='https://ui-avatars.com/api/?name=Mayank+Mishra&size=280&background=6366f1&color=fff&bold=true&font-size=0.38'"
+            />
+          </div>
+
+          <h1>Mayank Mishra</h1>
+
+          <div class="role-badge"> Full Stack Engineer</div>
+
+          <div class="location">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Punjab, India
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="socials">
+            <a href="https://www.linkedin.com/in/mayank-mishra-b80673319/" target="_blank" rel="noopener" class="social-link">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452H16.89v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a1.982 1.982 0 01-1.98-1.98 1.98 1.98 0 111.98 1.98zm1.706 13.019H3.63V9h3.414v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+              <span>LinkedIn</span>
+              <span class="arrow">🔗</span>
+            </a>
+            <a href="mailto:mayank2008mishra08@gmail.com" class="social-link">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 01-2.06 0L2 7"/></svg>
+              <span>Email me</span>
+              <span class="arrow">📧</span>
+            </a>
+          </div>
+
+        </aside>
+
+        <!-- RIGHT PANEL -->
+        <main class="panel-right">
+
+          <div class="bio-section">
+            <span class="section-label">About</span>
+            <p>I'm a passionate Full Stack Software Engineer currently pursuing my B.Tech degree from Lovely Professional University. I love building products that are fast, beautiful, and purposeful � and I'm always eager to collaborate with driven teams on ambitious ideas.</p>
+          </div>
+
+          <div>
+            <span class="section-label">At a Glance</span>
+            <div class="stats">
+              <div class="stat"><div class="stat-val">B.Tech</div><div class="stat-key">Degree</div></div>
+              <div class="stat"><div class="stat-val">LPU</div><div class="stat-key">University</div></div>
+              <div class="stat"><div class="stat-val">Full Stack</div><div class="stat-key">Specialty</div></div>
+              <div class="stat"><div class="stat-val">Punjab</div><div class="stat-key">Location</div></div>
+              <div class="stat"><div class="stat-val">Open</div><div class="stat-key">To Work</div></div>
+              <div class="stat"><div class="stat-val">2029</div><div class="stat-key">graduation Year</div></div>
+            </div>
+          </div>
+
+          <div class="skills-section">
+            <span class="section-label">Tech Stack</span>
+            <div class="skill-tags">
+              <span class="tag">React</span>
+              <span class="tag">Next.js</span>
+              <span class="tag">Node.js</span>
+              <span class="tag">TypeScript</span>
+              <span class="tag">Express</span>
+              <span class="tag">MongoDB</span>
+              <span class="tag">PostgreSQL</span>
+              <span class="tag">Tailwind CSS</span>
+              <span class="tag">REST APIs</span>
+              <span class="tag">Git</span>
+              <span class="tag">Docker</span>
+            </div>
+          </div>
+
+          <div class="cta-row">
+            <a href="https://www.linkedin.com/in/mayank-mishra-b80673319/" target="_blank" rel="noopener" class="btn-primary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452H16.89v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a1.982 1.982 0 01-1.98-1.98 1.98 1.98 0 111.98 1.98zm1.706 13.019H3.63V9h3.414v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+              Connect on LinkedIn
+            </a>
+            <a href="mailto:mayank@example.com" class="btn-secondary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 01-2.06 0L2 7"/></svg>
+              Say Hello
+            </a>
+          </div>
+
+        </main>
+
+      </div>
+
+      <p class="footer">Crafted with passion by Mayank Mishra &nbsp;&middot;&nbsp; 2026</p>
+
+    </div>
+  </div>
+
+  <script>
+    /* Theme */
+    const html = document.documentElement;
+    const tIcon = document.getElementById('t-icon');
+    const tLabel = document.getElementById('t-label');
+    // Dark is always the default; only switch to light if explicitly saved
+    if (localStorage.getItem('theme') === 'light') setLight(); else setDark();
+
+    function toggleTheme() { html.classList.contains('dark') ? setLight() : setDark(); }
+    function setDark()  { html.classList.remove('light'); html.classList.add('dark');  tIcon.textContent='🌑'; tLabel.textContent='Dark';  localStorage.setItem('theme','dark'); }
+    function setLight() { html.classList.remove('dark');  html.classList.add('light'); tIcon.textContent='☀️'; tLabel.textContent='Light'; localStorage.setItem('theme','light'); }
+
+    /* ── Comet / Shooting-star canvas ─────────────── */
+    const canvas = document.getElementById('canvas');
+    const ctx    = canvas.getContext('2d');
+    let W, H;
+
+    /* ── Static background stars ───────────────────── */
+    let stars = [];
+    function initStars() {
+      const count = Math.min(Math.floor((W * H) / 6000), 200);
+      stars = Array.from({ length: count }, () => ({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        r: Math.random() * 1.1 + 0.2,
+        base: Math.random() * 0.55 + 0.1,
+        phase: Math.random() * Math.PI * 2,   // twinkle phase
+        speed: Math.random() * 0.02 + 0.008,  // twinkle speed
+      }));
+    }
+
+    /* ── Comets ─────────────────────────────────────── */
+    let comets = [];
+
+    function spawnComet() {
+      const isDark = html.classList.contains('dark');
+      // Angle: mostly top-left → bottom-right (30°–60°), sometimes steeper
+      const angle  = (Math.PI / 180) * (30 + Math.random() * 40);
+      const speed  = 6 + Math.random() * 10;
+      const tailLen = W * (0.12 + Math.random() * 0.18);   // 12–30% of screen width
+      const bright  = isDark
+        ? `rgba(${[
+            '200,210,255',
+            '180,160,255',
+            '255,200,230',
+            '160,220,255',
+          ][Math.floor(Math.random()*4)]},`
+        : `rgba(99,102,241,`;
+
+      comets.push({
+        // Start from top edge or left edge
+        x: Math.random() * W * 1.2 - W * 0.1,
+        y: -20,
+        vx:  Math.cos(angle) * speed,
+        vy:  Math.sin(angle) * speed,
+        tail: tailLen,
+        r:    Math.random() * 1.6 + 0.6,   // head radius
+        alpha: 0.9 + Math.random() * 0.1,
+        bright,
+        glow: Math.random() > 0.7,          // 30% chance of extra glow
+        dead: false,
+      });
+    }
+
+    // Stagger the initial comets so it doesn't start empty
+    let lastSpawn = 0;
+    const SPAWN_MIN = 300;   // ms between spawns (min)
+    const SPAWN_MAX = 1100;  // ms between spawns (max)
+    let nextSpawn = SPAWN_MIN + Math.random() * (SPAWN_MAX - SPAWN_MIN);
+
+    /* ── Draw ──────────────────────────────────────── */
+    let lastT = 0;
+    function frame(t) {
+      const dt = t - lastT; lastT = t;
+      const isDark = html.classList.contains('dark');
+
+      ctx.clearRect(0, 0, W, H);
+
+      /* --- Twinkling stars --- */
+      const starCol = isDark ? '180,190,255' : '99,102,241';
+      stars.forEach(s => {
+        s.phase += s.speed;
+        const alpha = s.base + Math.sin(s.phase) * (s.base * 0.5);
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${starCol},${alpha})`;
+        ctx.fill();
+      });
+
+      /* --- Comets --- */
+      comets.forEach(c => {
+        c.x += c.vx;
+        c.y += c.vy;
+
+        // Tail direction (opposite to velocity)
+        const tailX = c.x - c.vx / Math.hypot(c.vx, c.vy) * c.tail;
+        const tailY = c.y - c.vy / Math.hypot(c.vx, c.vy) * c.tail;
+
+        // Optional glow halo
+        if (c.glow) {
+          const glow = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, c.r * 6);
+          glow.addColorStop(0, c.bright + '0.25)');
+          glow.addColorStop(1, c.bright + '0)');
+          ctx.beginPath();
+          ctx.arc(c.x, c.y, c.r * 6, 0, Math.PI * 2);
+          ctx.fillStyle = glow;
+          ctx.fill();
+        }
+
+        // Gradient tail
+        const grad = ctx.createLinearGradient(c.x, c.y, tailX, tailY);
+        grad.addColorStop(0,   c.bright + c.alpha + ')');
+        grad.addColorStop(0.3, c.bright + (c.alpha * 0.4) + ')');
+        grad.addColorStop(1,   c.bright + '0)');
+
+        ctx.save();
+        ctx.lineWidth = c.r * 1.2;
+        ctx.strokeStyle = grad;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(c.x, c.y);
+        ctx.lineTo(tailX, tailY);
+        ctx.stroke();
+
+        // Bright head dot
+        const head = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, c.r * 2.5);
+        head.addColorStop(0,   c.bright + c.alpha + ')');
+        head.addColorStop(0.5, c.bright + (c.alpha * 0.6) + ')');
+        head.addColorStop(1,   c.bright + '0)');
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, c.r * 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = head;
+        ctx.fill();
+        ctx.restore();
+
+        // Mark dead when out of screen
+        if (c.x > W + 100 || c.y > H + 100) c.dead = true;
+      });
+
+      // Remove dead comets
+      comets = comets.filter(c => !c.dead);
+
+      // Spawn new comets on timer
+      lastSpawn += dt;
+      if (lastSpawn >= nextSpawn) {
+        spawnComet();
+        // Occasional double
+        if (Math.random() > 0.55) setTimeout(spawnComet, 100 + Math.random() * 180);
+        lastSpawn = 0;
+        nextSpawn = SPAWN_MIN + Math.random() * (SPAWN_MAX - SPAWN_MIN);
+      }
+
+      requestAnimationFrame(frame);
+    }
+
+    function resize() {
+      W = canvas.width  = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+      initStars();
+    }
+
+    window.addEventListener('resize', resize);
+    resize();
+    // Pre-seed 6 comets so it feels alive immediately
+    for (let i = 0; i < 6; i++) setTimeout(spawnComet, i * 120);
+    requestAnimationFrame(frame);
+  </script>
+
+</body>
+</html>
